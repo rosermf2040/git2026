@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rosermf2040 的个人空间</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #fff5e6 0%, #ffe0c2 50%, #ffd1b3 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #5c3a21;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow:
+        0 10px 30px rgba(255, 153, 102, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #d2691e;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #a0673a;
+      margin-bottom: 32px;
+      font-style: italic;
+    }
+
+    .intro {
+      background: rgba(255, 245, 230, 0.6);
+      border-left: 4px solid #ffa770;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 36px;
+      text-align: left;
+      line-height: 1.9;
+      font-size: 1rem;
+      color: #6b4423;
+    }
+
+    .intro p {
+      margin-bottom: 10px;
+    }
+
+    .intro p:last-child {
+      margin-bottom: 0;
+    }
+
+    .heart {
+      color: #ff6b6b;
+      display: inline-block;
+      animation: beat 1.2s ease-in-out infinite;
+    }
+
+    @keyframes beat {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.2); }
+    }
+
+    .clock-wrapper {
+      background: linear-gradient(145deg, #3d2817, #2a1810);
+      border-radius: 16px;
+      padding: 28px 20px;
+      box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.4),
+        0 4px 14px rgba(255, 167, 112, 0.3);
+    }
+
+    .clock-label {
+      font-size: 0.8rem;
+      color: #ffa770;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .clock {
+      font-family: "Courier New", "Menlo", monospace;
+      font-size: 3rem;
+      font-weight: bold;
+      color: #ffb88c;
+      letter-spacing: 6px;
+      text-shadow:
+        0 0 8px rgba(255, 184, 140, 0.6),
+        0 0 18px rgba(255, 167, 112, 0.4);
+    }
+
+    .date {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      color: #d9a679;
+      letter-spacing: 2px;
+    }
+
+    .footer {
+      margin-top: 28px;
+      font-size: 0.85rem;
+      color: #a0673a;
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 32px 22px; }
+      h1         { font-size: 1.7rem; }
+      .clock     { font-size: 2.2rem; letter-spacing: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>rosermf2040 的个人空间</h1>
+    <p class="subtitle">~ 一个属于自己的温暖小角落 ~</p>
+
+    <div class="intro">
+      <p>你好呀,欢迎来到我的小天地 <span class="heart">♥</span></p>
+      <p>我是 rosermf2040,一个热爱代码、也热爱生活的人。
+        在键盘的敲击声里寻找逻辑的优雅,在清晨的咖啡香里感受日常的美好。</p>
+      <p>事业是我表达自己的方式,我相信每一行用心写下的代码,都在让世界变得更好一点;
+        而生活,是事业之外最温柔的礼物 —— 一本好书、一段散步、一顿家常便饭,
+        都让我觉得活着真的很值得。</p>
+      <p>愿你也能在这里慢下来,听一听时间流过的声音。</p>
+    </div>
+
+    <div class="clock-wrapper">
+      <div class="clock-label">· Now ·</div>
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="date" id="date">----年--月--日 星期--</div>
+    </div>
+
+    <div class="footer">© rosermf2040 · 用心生活,认真热爱</div>
+  </div>
+
+  <script>
+    const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+
+    function pad(n) {
+      return n.toString().padStart(2, '0');
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const h = pad(now.getHours());
+      const m = pad(now.getMinutes());
+      const s = pad(now.getSeconds());
+      document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+
+      const y = now.getFullYear();
+      const mo = pad(now.getMonth() + 1);
+      const d = pad(now.getDate());
+      const w = weekDays[now.getDay()];
+      document.getElementById('date').textContent = `${y}年${mo}月${d}日 星期${w}`;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
