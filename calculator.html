@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>计算器 · Calculator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-grad-1: #1e1b4b;
+      --bg-grad-2: #312e81;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-border: rgba(255, 255, 255, 0.15);
+      --display: rgba(0, 0, 0, 0.25);
+      --txt: #f1f5f9;
+      --txt-dim: #94a3b8;
+      --num: rgba(255, 255, 255, 0.1);
+      --num-hover: rgba(255, 255, 255, 0.18);
+      --op: #6366f1;
+      --op-hover: #818cf8;
+      --fn: rgba(99, 102, 241, 0.25);
+      --fn-hover: rgba(99, 102, 241, 0.4);
+      --equal: #f59e0b;
+      --equal-hover: #fbbf24;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: var(--txt);
+    }
+
+    .calculator {
+      width: 100%;
+      max-width: 360px;
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      animation: rise 0.5s ease-out;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .title {
+      text-align: center;
+      font-size: 0.8rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--txt-dim);
+      margin-bottom: 16px;
+    }
+
+    .display {
+      background: var(--display);
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      text-align: right;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .history {
+      font-size: 0.95rem;
+      color: var(--txt-dim);
+      min-height: 22px;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .result {
+      font-size: 2.6rem;
+      font-weight: 600;
+      word-break: break-all;
+      line-height: 1.15;
+      margin-top: 6px;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-size: 1.25rem;
+      font-family: inherit;
+      color: var(--txt);
+      background: var(--num);
+      border-radius: 16px;
+      padding: 18px 0;
+      transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease;
+      user-select: none;
+    }
+
+    button:hover { background: var(--num-hover); }
+    button:active { transform: scale(0.93); }
+
+    button.fn      { background: var(--fn); color: #c7d2fe; font-size: 1.05rem; }
+    button.fn:hover{ background: var(--fn-hover); }
+
+    button.op      { background: var(--op); font-weight: 600; }
+    button.op:hover{ background: var(--op-hover); }
+    button.op.active { box-shadow: 0 0 0 2px var(--equal) inset; }
+
+    button.equal      { background: var(--equal); color: #1e1b4b; font-weight: 700; }
+    button.equal:hover{ background: var(--equal-hover); }
+
+    button.span-2 { grid-column: span 2; }
+
+    .hint {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--txt-dim);
+      margin-top: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 380px) {
+      .result { font-size: 2.1rem; }
+      button  { padding: 15px 0; font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="title">· Calculator ·</div>
+
+    <div class="display">
+      <div class="history" id="history">&nbsp;</div>
+      <div class="result" id="result">0</div>
+    </div>
+
+    <div class="keys">
+      <button class="fn" data-action="clear">AC</button>
+      <button class="fn" data-action="delete">⌫</button>
+      <button class="fn" data-action="percent">%</button>
+      <button class="op" data-op="/">÷</button>
+
+      <button data-num="7">7</button>
+      <button data-num="8">8</button>
+      <button data-num="9">9</button>
+      <button class="op" data-op="*">×</button>
+
+      <button data-num="4">4</button>
+      <button data-num="5">5</button>
+      <button data-num="6">6</button>
+      <button class="op" data-op="-">−</button>
+
+      <button data-num="1">1</button>
+      <button data-num="2">2</button>
+      <button data-num="3">3</button>
+      <button class="op" data-op="+">+</button>
+
+      <button data-action="negate">±</button>
+      <button data-num="0">0</button>
+      <button data-num=".">.</button>
+      <button class="equal" data-action="equals">=</button>
+    </div>
+
+    <div class="hint">支持键盘输入 · Enter 计算 · Esc 清空</div>
+  </div>
+
+  <script>
+    const resultEl = document.getElementById('result');
+    const historyEl = document.getElementById('history');
+
+    let current = '0';      // current entry as string
+    let previous = null;    // stored operand (number)
+    let operator = null;    // pending operator
+    let justEvaluated = false;
+
+    const opSymbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+
+    function format(numStr) {
+      if (numStr === '' || numStr === '-') return numStr;
+      const n = Number(numStr);
+      if (!isFinite(n)) return '错误';
+      // keep user-typed trailing dot / zeros, otherwise group with commas
+      if (/[.]/.test(numStr) && numStr.endsWith('.')) {
+        return groupInt(numStr.slice(0, -1)) + '.';
+      }
+      if (numStr.includes('.')) {
+        const [i, d] = numStr.split('.');
+        return groupInt(i) + '.' + d;
+      }
+      return groupInt(numStr);
+    }
+
+    function groupInt(s) {
+      const neg = s.startsWith('-');
+      const digits = neg ? s.slice(1) : s;
+      return (neg ? '-' : '') + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function render() {
+      resultEl.textContent = format(current);
+      if (operator !== null && previous !== null) {
+        historyEl.textContent = `${groupInt(String(previous))} ${opSymbols[operator]}`;
+      }
+    }
+
+    function inputNum(d) {
+      if (justEvaluated) { current = '0'; justEvaluated = false; }
+      if (d === '.') {
+        if (current.includes('.')) return;
+        current = current === '' ? '0.' : current + '.';
+      } else {
+        current = (current === '0') ? d : current + d;
+      }
+      render();
+    }
+
+    function chooseOp(op) {
+      if (operator !== null && !justEvaluated && current !== '') {
+        compute();
+      } else {
+        previous = Number(current);
+      }
+      operator = op;
+      justEvaluated = false;
+      current = '';
+      historyEl.textContent = `${groupInt(String(previous))} ${opSymbols[op]}`;
+      highlightOp(op);
+    }
+
+    function compute() {
+      if (operator === null || previous === null) return;
+      const a = previous;
+      const b = current === '' ? a : Number(current);
+      let r;
+      switch (operator) {
+        case '+': r = a + b; break;
+        case '-': r = a - b; break;
+        case '*': r = a * b; break;
+        case '/':
+          if (b === 0) { showError('不能除以 0'); return; }
+          r = a / b; break;
+      }
+      // avoid floating point noise
+      r = Math.round((r + Number.EPSILON) * 1e10) / 1e10;
+      historyEl.textContent = `${groupInt(String(a))} ${opSymbols[operator]} ${groupInt(String(b))} =`;
+      current = String(r);
+      previous = r;
+      operator = null;
+      justEvaluated = true;
+      clearHighlight();
+      render();
+    }
+
+    function showError(msg) {
+      historyEl.textContent = msg;
+      resultEl.textContent = '错误';
+      current = '0'; previous = null; operator = null; justEvaluated = true;
+      clearHighlight();
+    }
+
+    function clearAll() {
+      current = '0'; previous = null; operator = null; justEvaluated = false;
+      historyEl.innerHTML = '&nbsp;';
+      clearHighlight();
+      render();
+    }
+
+    function del() {
+      if (justEvaluated) return clearAll();
+      if (current.length <= 1 || (current.length === 2 && current.startsWith('-'))) {
+        current = '0';
+      } else {
+        current = current.slice(0, -1);
+      }
+      render();
+    }
+
+    function percent() {
+      if (current === '') return;
+      current = String(Number(current) / 100);
+      render();
+    }
+
+    function negate() {
+      if (current === '' || current === '0') return;
+      current = current.startsWith('-') ? current.slice(1) : '-' + current;
+      render();
+    }
+
+    function highlightOp(op) {
+      clearHighlight();
+      document.querySelector(`button[data-op="${op}"]`)?.classList.add('active');
+    }
+    function clearHighlight() {
+      document.querySelectorAll('button.op.active').forEach(b => b.classList.remove('active'));
+    }
+
+    document.querySelector('.keys').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.dataset.num !== undefined) inputNum(btn.dataset.num);
+      else if (btn.dataset.op !== undefined) chooseOp(btn.dataset.op);
+      else switch (btn.dataset.action) {
+        case 'clear':   clearAll(); break;
+        case 'delete':  del(); break;
+        case 'percent': percent(); break;
+        case 'negate':  negate(); break;
+        case 'equals':  compute(); break;
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const k = e.key;
+      if (k >= '0' && k <= '9') inputNum(k);
+      else if (k === '.') inputNum('.');
+      else if (['+', '-', '*', '/'].includes(k)) chooseOp(k);
+      else if (k === 'Enter' || k === '=') { e.preventDefault(); compute(); }
+      else if (k === 'Backspace') del();
+      else if (k === 'Escape') clearAll();
+      else if (k === '%') percent();
+    });
+
+    render();
+  </script>
+</body>
+</html>
