@@ -1,0 +1,15 @@
+stocks:
+  - code: "002594"
+    name: "比亚迪"
+    market: "sz"
+  - code: "600519"
+    name: "贵州茅台"
+    market: "sh"
+
+sources:
+  - "eastmoney"
+  - "sina"
+  - "cache"
+
+chart:
+  days: 5
