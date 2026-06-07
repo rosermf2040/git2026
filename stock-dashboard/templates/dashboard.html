@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自选股行情仪表板</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #fff5e6 0%, #ffe0c2 50%, #ffd1b3 100%);
+      padding: 24px;
+      color: #5c3a21;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* header */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      color: #d2691e;
+      margin-bottom: 6px;
+    }
+    .header .info {
+      font-size: 0.85rem;
+      color: #a0673a;
+    }
+    .header .info span {
+      margin: 0 8px;
+    }
+    .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+    .status-dot.live { background: #4ec9b0; }
+    .status-dot.offline { background: #e94545; }
+    .status-dot.closed { background: #f0ad4e; }
+
+    .toolbar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .btn-refresh {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 20px;
+      background: #ffa770;
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-refresh:hover { background: #ff8c52; }
+    .btn-refresh:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* stock card */
+    .stock-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow:
+        0 8px 24px rgba(255, 153, 102, 0.12),
+        0 2px 6px rgba(0, 0, 0, 0.04);
+      animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .stock-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #5c3a21;
+    }
+    .stock-code {
+      font-size: 0.8rem;
+      color: #a0673a;
+      margin-left: 8px;
+    }
+    .stock-price {
+      text-align: right;
+    }
+    .stock-price .price {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    .stock-price .change {
+      font-size: 0.95rem;
+    }
+    .up { color: #e94545; }
+    .down { color: #4ec946; }
+    .flat { color: #a0673a; }
+
+    /* chart */
+    .chart-box {
+      width: 100%;
+      height: 260px;
+      margin-bottom: 16px;
+      background: rgba(255, 245, 230, 0.35);
+      border-radius: 12px;
+    }
+
+    /* indicators */
+    .indicators {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .indicator {
+      background: rgba(255, 245, 230, 0.5);
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .indicator .label {
+      font-size: 0.7rem;
+      color: #a0673a;
+      margin-bottom: 2px;
+    }
+    .indicator .value {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    /* fundamentals */
+    .fundamentals {
+      border-top: 1px solid rgba(255, 167, 112, 0.25);
+      padding-top: 10px;
+    }
+    .fundamentals summary {
+      font-size: 0.9rem;
+      color: #d2691e;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .fundamentals .fund-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #6b4423;
+    }
+
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #a0673a;
+    }
+    .empty-state h2 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    /* responsive */
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .indicators { grid-template-columns: repeat(3, 1fr); }
+      .stock-price .price { font-size: 1.4rem; }
+      .chart-box { height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- header -->
+    <div class="header">
+      <h1>自选股行情仪表板</h1>
+      <div class="info">
+        {% if meta.count == 0 %}
+        <span>请在 config.yaml 中添加自选股</span>
+        {% else %}
+        <span>
+          {% if meta.is_trading %}
+          <span class="status-dot live"></span>交易中
+          {% else %}
+          <span class="status-dot closed"></span>已收盘
+          {% endif %}
+        </span>
+        <span>更新时间：<strong id="update-time">{{ meta.updated_at }}</strong></span>
+        <span>数据来源：<strong id="data-source">{{ meta.source }}</strong></span>
+        <span>共 {{ meta.count }} 只自选股</span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if stocks_data %}
+    <div class="toolbar">
+      <button class="btn-refresh" id="btn-refresh" onclick="refreshData()">刷新数据</button>
+    </div>
+    {% endif %}
+
+    <!-- stock cards -->
+    <div id="cards-container">
+      {% if stocks_data %}
+        {% for stock in stocks_data %}
+        <div class="stock-card" id="card-{{ stock.code }}" data-code="{{ stock.code }}">
+          <div class="card-header">
+            <div>
+              <span class="stock-name">{{ stock.name }}</span>
+              <span class="stock-code">{{ stock.code }}.{{ 'SZ' if stock.market == 'sz' else 'SH' }}</span>
+            </div>
+            <div class="stock-price">
+              {% if stock.price == '——' %}
+              <div class="price flat">——</div>
+              <div class="change">暂无数据</div>
+              {% elif stock.change >= 0 %}
+              <div class="price up">{{ "%.2f"|format(stock.price) }}</div>
+              <div class="change up">+{{ "%.2f"|format(stock.change) }} (+{{ stock.change_pct }}%)</div>
+              {% else %}
+              <div class="price down">{{ "%.2f"|format(stock.price) }}</div>
+              <div class="change down">{{ "%.2f"|format(stock.change) }} ({{ stock.change_pct }}%)</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- chart -->
+          <div class="chart-box" id="chart-{{ stock.code }}"></div>
+
+          <!-- indicators -->
+          <div class="indicators">
+            <div class="indicator"><div class="label">今开</div><div class="value">{{ stock.open }}</div></div>
+            <div class="indicator"><div class="label">昨收</div><div class="value">{{ stock.close_yest }}</div></div>
+            <div class="indicator"><div class="label">最高</div><div class="value">{{ stock.high }}</div></div>
+            <div class="indicator"><div class="label">最低</div><div class="value">{{ stock.low }}</div></div>
+            <div class="indicator"><div class="label">成交量</div><div class="value">{{ stock.volume }}</div></div>
+            <div class="indicator"><div class="label">成交额</div><div class="value">{{ stock.amount }}</div></div>
+            <div class="indicator"><div class="label">市盈率</div><div class="value">{{ stock.pe }}</div></div>
+            <div class="indicator"><div class="label">市净率</div><div class="value">{{ stock.pb }}</div></div>
+          </div>
+
+          <!-- fundamentals -->
+          <details class="fundamentals">
+            <summary>基本面 &amp; 资金面</summary>
+            <div class="fund-grid">
+              <div><strong>总市值：</strong>{{ stock.market_cap }}</div>
+              <div><strong>换手率：</strong>{{ stock.turnover_rate }}</div>
+            </div>
+          </details>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state">
+        <h2>暂无自选股</h2>
+        <p>请在 config.yaml 中配置 stocks 列表，然后重启服务。</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    // initial data
+    const initialData = {{ stocks_data | tojson }};
+
+    // ECharts init
+    const charts = {};
+
+    function initChart(code, history) {
+      const dom = document.getElementById('chart-' + code);
+      if (!dom) return;
+      if (charts[code]) charts[code].dispose();
+
+      const chart = echarts.init(dom);
+      charts[code] = chart;
+
+      const dates = (history || []).map(h => h.date);
+      const closes = (history || []).map(h => h.close);
+      const hasData = dates.length > 0 && closes.length > 0;
+
+      chart.setOption({
+        grid: { left: 50, right: 20, top: 20, bottom: 30 },
+        xAxis: {
+          type: 'category',
+          data: hasData ? dates : ['暂无数据'],
+          axisLine: { lineStyle: { color: '#d9a679' } },
+          axisLabel: { color: '#a0673a', fontSize: 11 },
+        },
+        yAxis: {
+          type: 'value',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,167,112,0.2)' } },
+          axisLabel: { color: '#a0673a', fontSize: 11 },
+        },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(255,255,255,0.9)',
+          borderColor: '#ffa770',
+          textStyle: { color: '#5c3a21' },
+        },
+        series: [{
+          type: 'line',
+          data: hasData ? closes : [],
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 6,
+          lineStyle: { color: '#ffa770', width: 2 },
+          itemStyle: { color: '#d2691e' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(255,167,112,0.35)' },
+              { offset: 1, color: 'rgba(255,167,112,0.02)' },
+            ]),
+          },
+        }],
+      });
+    }
+
+    // init all charts
+    initialData.forEach(stock => {
+      initChart(stock.code, stock.history);
+    });
+
+    // auto refresh
+    let refreshTimer = null;
+
+    function startAutoRefresh() {
+      refreshTimer = setInterval(refreshData, 30000);
+    }
+
+    async function refreshData() {
+      const btn = document.getElementById('btn-refresh');
+      if (btn) btn.disabled = true;
+      try {
+        const resp = await fetch('/api/data');
+        const json = await resp.json();
+        document.getElementById('update-time').textContent = json.meta.updated_at;
+
+        const sourceEl = document.getElementById('data-source');
+        if (sourceEl) sourceEl.textContent = json.meta.source;
+
+        json.stocks.forEach(stock => {
+          const card = document.getElementById('card-' + stock.code);
+          if (!card) return;
+          // update price
+          const priceEl = card.querySelector('.price');
+          const changeEl = card.querySelector('.change');
+          if (stock.price === '——') {
+            priceEl.textContent = '——';
+            priceEl.className = 'price flat';
+            changeEl.textContent = '暂无数据';
+          } else {
+            priceEl.textContent = stock.price.toFixed(2);
+            if (stock.change >= 0) {
+              priceEl.className = 'price up';
+              changeEl.className = 'change up';
+              changeEl.textContent = '+' + stock.change.toFixed(2) + ' (+' + stock.change_pct + '%)';
+            } else {
+              priceEl.className = 'price down';
+              changeEl.className = 'change down';
+              changeEl.textContent = stock.change.toFixed(2) + ' (' + stock.change_pct + '%)';
+            }
+          }
+          // update indicators
+          const indicators = card.querySelectorAll('.indicator .value');
+          const vals = [
+            stock.open, stock.close_yest, stock.high, stock.low,
+            stock.volume, stock.amount, stock.pe, stock.pb,
+          ];
+          indicators.forEach((el, i) => { if (i < vals.length) el.textContent = vals[i]; });
+          // update chart
+          if (stock.history && stock.history.length > 0) {
+            charts[stock.code].setOption({
+              xAxis: { data: stock.history.map(h => h.date) },
+              series: [{ data: stock.history.map(h => h.close) }],
+            });
+          }
+        });
+      } catch (err) {
+        console.error('refresh failed:', err);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    startAutoRefresh();
+
+    // resize
+    window.addEventListener('resize', () => {
+      Object.values(charts).forEach(c => c.resize());
+    });
+  </script>
+</body>
+</html>
