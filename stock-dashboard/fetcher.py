@@ -98,6 +98,10 @@ def _fetch_sina(code, market, name):
     if len(fields) < 32:
         raise ValueError(f"新浪返回字段不足: {len(fields)} 个")
 
+    # 停牌股票返回空字符串，提前检测避免 float("") 引发 ValueError
+    if not fields[3] or not fields[2]:
+        raise ValueError("股票可能已停牌，价格字段为空")
+
     price = float(fields[3])
     close_yest = float(fields[2])
     change = round(price - close_yest, 2)
@@ -188,6 +192,8 @@ FETCHERS = {
 
 def fetch_stock(code, market, name, sources):
     """按 sources 依次尝试抓取，返回统一格式 dict。"""
+    if market not in ("sz", "sh"):
+        raise ValueError(f"market 必须是 'sz' 或 'sh'，收到: {market}")
     result = None
     for src in sources:
         fetcher = FETCHERS.get(src)
@@ -195,7 +201,7 @@ def fetch_stock(code, market, name, sources):
             continue
         try:
             result = fetcher(code, market, name)
-            if result and result.get("price") != "——":
+            if result and result.get("price") not in (None, 0, "——", 0.0):
                 break
         except Exception:
             continue
