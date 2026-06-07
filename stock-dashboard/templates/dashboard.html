@@ -349,6 +349,7 @@
       if (btn) btn.disabled = true;
       try {
         const resp = await fetch('/api/data');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const json = await resp.json();
         document.getElementById('update-time').textContent = json.meta.updated_at;
 
@@ -385,8 +386,9 @@
           ];
           indicators.forEach((el, i) => { if (i < vals.length) el.textContent = vals[i]; });
           // update chart
-          if (stock.history && stock.history.length > 0) {
-            charts[stock.code].setOption({
+          const chart = charts[stock.code];
+          if (chart && stock.history && stock.history.length > 0) {
+            chart.setOption({
               xAxis: { data: stock.history.map(h => h.date) },
               series: [{ data: stock.history.map(h => h.close) }],
             });
