@@ -1,0 +1,56 @@
+{
+  "002594": {
+    "code": "002594",
+    "name": "比亚迪",
+    "market": "sz",
+    "price": 93.01,
+    "change": -0.43,
+    "change_pct": -0.46,
+    "open": 93.52,
+    "close_yest": 93.44,
+    "high": 94.00,
+    "low": 92.30,
+    "volume": "34.00万手",
+    "amount": "31.59亿",
+    "pe": 30.78,
+    "pb": 3.66,
+    "market_cap": "约8,480亿",
+    "turnover_rate": 0.98,
+    "history": [
+      {"date": "6/1", "close": 93.65},
+      {"date": "6/2", "close": 96.76},
+      {"date": "6/3", "close": 94.82},
+      {"date": "6/4", "close": 93.11},
+      {"date": "6/5", "close": 93.01}
+    ],
+    "source": "cache",
+    "updated_at": "2026-06-05 15:00:00"
+  },
+  "600519": {
+    "code": "600519",
+    "name": "贵州茅台",
+    "market": "sh",
+    "price": 1272.86,
+    "change": 4.86,
+    "change_pct": 0.38,
+    "open": 1278.00,
+    "close_yest": 1268.00,
+    "high": 1283.00,
+    "low": 1267.74,
+    "volume": "313.04万手",
+    "amount": "39.84亿",
+    "pe": 14.60,
+    "pb": 5.87,
+    "market_cap": "约1.59万亿",
+    "turnover_rate": 0.25,
+    "history": [
+      {"date": "6/1", "close": 1309.60},
+      {"date": "6/2", "close": 1307.22},
+      {"date": "6/3", "close": 1281.91},
+      {"date": "6/4", "close": 1268.00},
+      {"date": "6/5", "close": 1272.86}
+    ],
+    "source": "cache",
+    "updated_at": "2026-06-05 15:00:00"
+  }
+}
