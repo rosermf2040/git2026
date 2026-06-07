@@ -197,7 +197,9 @@
         <span>请在 config.yaml 中添加自选股</span>
         {% else %}
         <span>
-          {% if meta.is_trading %}
+          {% if meta.source == 'cache' %}
+          <span class="status-dot offline"></span>离线（缓存数据）
+          {% elif meta.is_trading %}
           <span class="status-dot live"></span>交易中
           {% else %}
           <span class="status-dot closed"></span>已收盘

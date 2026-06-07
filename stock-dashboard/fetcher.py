@@ -107,7 +107,7 @@ def _fetch_sina(code, market, name):
     change = round(price - close_yest, 2)
     change_pct = round(change / close_yest * 100, 2) if close_yest else 0
     volume_shares = int(fields[8])
-    amount_yuan = float(fields[9]) * 10000  # 新浪单位是万元
+    amount_yuan = float(fields[9])  # 新浪返回成交额单位已是元
 
     return {
         "code": code,
