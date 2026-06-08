@@ -1,11 +1,23 @@
 """行情数据抓取与缓存模块。按 config.yaml 中的 sources 顺序尝试，兜底读本地缓存。"""
 import json
+import os
 import re
 import time
 from datetime import datetime
 from pathlib import Path
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+# 绕过系统代理，避免因本地代理不可用导致 API 请求挂起
+session = requests.Session()
+session.trust_env = False
+# 东财等接口偶发瞬时断连(RemoteDisconnected)，对幂等 GET 自动重试 2 次(退避 0.5/1.0s)，
+# 避免一次抖动就回退到新浪、白白丢掉基本面/资金面字段；成功路径零开销
+_retry = Retry(total=2, backoff_factor=0.5, allowed_methods=frozenset(["GET"]))
+session.mount("https://", HTTPAdapter(max_retries=_retry))
+session.mount("http://", HTTPAdapter(max_retries=_retry))
 
 DATA_DIR = Path(__file__).parent / "data"
 CACHE_FILE = DATA_DIR / "cache.json"
@@ -37,42 +49,57 @@ def _parse_amount(amount_yuan):
 
 # ── 东方财富 API ─────────────────────────────────────
 
+def _em_val(v, scale=100, ndigits=2, empty="——", zero_ok=False):
+    """东方财富原始字段 → 展示值。
+    - 非数值（如 f58 名称是字符串）或 None → 返回 empty，从根上杜绝 str/None ÷ int 崩溃
+    - 默认把 0 也当「无数据」返回 empty；涨跌额/涨跌幅这类平盘合法为 0 的字段传 zero_ok=True
+    """
+    if isinstance(v, (int, float)) and (zero_ok or v != 0):
+        return round(v / scale, ndigits)
+    return empty
+
+
 def _fetch_eastmoney(code, market, name):
     secid = f"0.{code}" if market == "sz" else f"1.{code}"
-    fields = "f43,f44,f45,f46,f47,f48,f50,f51,f52,f55,f58,f116,f167,f168"
+    # 字段语义已对照接口真实返回校准（曾把 f58 名称误当市盈率，str÷int 让整个源每次崩溃）：
+    #   f43现价 f44最高 f45最低 f46今开 f47成交量(手) f48成交额(元)
+    #   f60昨收 f116总市值 f162市盈率(动) f167市净率 f168换手率 f169涨跌额 f170涨跌幅
+    fields = "f43,f44,f45,f46,f47,f48,f60,f116,f162,f167,f168,f169,f170"
     url = (
         f"https://push2.eastmoney.com/api/qt/stock/get"
         f"?secid={secid}&fields={fields}"
     )
-    resp = requests.get(url, timeout=5)
+    resp = session.get(url, timeout=5)
     resp.raise_for_status()
     d = resp.json().get("data", {})
     if not d:
         raise ValueError("东方财富返回空数据")
 
-    price = d.get("f43", 0) / 100
-    change = d.get("f50", 0) / 100
-    change_pct = round(d.get("f51", 0) / 100, 2)
-    volume_shares = d.get("f47")
-    amount_yuan = d.get("f48")
+    price = _em_val(d.get("f43"))
+    if price == "——":
+        raise ValueError("东方财富现价为空，疑似停牌")
+
+    # 东财 f47 单位是「手」，而 _parse_volume 期望「股」(内部 ÷100 折算手)，先 ×100 对齐口径
+    volume_shares = (d.get("f47") or 0) * 100
+    f116 = d.get("f116")
 
     return {
         "code": code,
         "name": name,
         "market": market,
         "price": price,
-        "change": change,
-        "change_pct": change_pct,
-        "open": d.get("f46", 0) / 100 if d.get("f46") else "——",
-        "close_yest": d.get("f52", 0) / 100 if d.get("f52") else "——",
-        "high": d.get("f44", 0) / 100 if d.get("f44") else "——",
-        "low": d.get("f45", 0) / 100 if d.get("f45") else "——",
+        "change": _em_val(d.get("f169"), empty=0, zero_ok=True),
+        "change_pct": _em_val(d.get("f170"), empty=0, zero_ok=True),
+        "open": _em_val(d.get("f46")),
+        "close_yest": _em_val(d.get("f60")),
+        "high": _em_val(d.get("f44")),
+        "low": _em_val(d.get("f45")),
         "volume": _parse_volume(volume_shares),
-        "amount": _parse_amount(amount_yuan),
-        "pe": round(d.get("f58", 0) / 100, 2) if d.get("f58") else "——",
-        "pb": round(d.get("f167", 0) / 100, 2) if d.get("f167") else "——",
-        "market_cap": f"{d.get('f116', 0) / 1e8:.0f}亿" if d.get("f116") else "——",
-        "turnover_rate": round(d.get("f55", 0) / 100, 2) if d.get("f55") else "——",
+        "amount": _parse_amount(d.get("f48")),
+        "pe": _em_val(d.get("f162")),
+        "pb": _em_val(d.get("f167")),
+        "market_cap": f"{f116 / 1e8:.0f}亿" if isinstance(f116, (int, float)) and f116 else "——",
+        "turnover_rate": _em_val(d.get("f168")),
         "history": [],
         "source": "eastmoney",
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -85,7 +112,7 @@ def _fetch_sina(code, market, name):
     symbol = f"{market}{code}"
     url = f"https://hq.sinajs.cn/list={symbol}"
     headers = {"Referer": "https://finance.sina.com.cn"}
-    resp = requests.get(url, timeout=5, headers=headers)
+    resp = session.get(url, timeout=5, headers=headers)
     resp.raise_for_status()
     resp.encoding = "gbk"
     text = resp.text
@@ -203,7 +230,9 @@ def fetch_stock(code, market, name, sources):
             result = fetcher(code, market, name)
             if result and result.get("price") not in (None, 0, "——", 0.0):
                 break
-        except Exception:
+        except Exception as e:
+            # 不再静默吞异常：曾因东财字段编号写错导致每次崩溃却无人察觉
+            print(f"[fetch] 数据源 {src} 抓取 {name}({code}) 失败: {type(e).__name__}: {e}")
             continue
 
     if result is None:
