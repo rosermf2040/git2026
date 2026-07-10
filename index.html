@@ -1,187 +1,1160 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>rosermf2040 的个人空间,我准备更改这个页面！！！牛逼把。</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>备忘录</title>
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    body {
-      min-height: 100vh;
-      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-      background: linear-gradient(135deg, #fff5e6 0%, #ffe0c2 50%, #ffd1b3 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      color: #5c3a21;
-    }
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fff5e6 0%, #ffe0c2 50%, #ffd1b3 100%);
+  color: #5c3a21;
+  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+}
 
-    .container {
-      width: 100%;
-      max-width: 680px;
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(12px);
-      border-radius: 24px;
-      padding: 48px 40px;
-      box-shadow:
-        0 10px 30px rgba(255, 153, 102, 0.15),
-        0 4px 12px rgba(0, 0, 0, 0.05);
-      text-align: center;
-      animation: fadeIn 0.8s ease-out;
-    }
+/* ===== 屏幕切换 ===== */
+.screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+.screen.hidden {
+  display: none;
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+/* ===== 磨砂玻璃卡片 ===== */
+.card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(255, 153, 102, 0.15), 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 40px 36px;
+  width: min(100%, 420px);
+  animation: fadeIn 0.5s ease-out;
+}
 
-    h1 {
-      font-size: 2.2rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #d2691e;
-      letter-spacing: 1px;
-    }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-    .subtitle {
-      font-size: 0.95rem;
-      color: #a0673a;
-      margin-bottom: 32px;
-      font-style: italic;
-    }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-6px); }
+  80%      { transform: translateX(6px); }
+}
 
-    .intro {
-      background: rgba(255, 245, 230, 0.6);
-      border-left: 4px solid #ffa770;
-      border-radius: 8px;
-      padding: 20px 24px;
-      margin-bottom: 36px;
-      text-align: left;
-      line-height: 1.9;
-      font-size: 1rem;
-      color: #6b4423;
-    }
+/* ===== 密码屏幕 ===== */
+.card h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #d2691e;
+  text-align: center;
+  margin-bottom: 6px;
+}
 
-    .intro p {
-      margin-bottom: 10px;
-    }
+.card .subtitle {
+  text-align: center;
+  color: #a0673a;
+  font-size: 0.95rem;
+  margin-bottom: 28px;
+}
 
-    .intro p:last-child {
-      margin-bottom: 0;
-    }
+.form-group {
+  margin-bottom: 16px;
+  position: relative;
+}
 
-    .heart {
-      color: #ff6b6b;
-      display: inline-block;
-      animation: beat 1.2s ease-in-out infinite;
-    }
+.form-group input {
+  width: 100%;
+  padding: 14px 44px 14px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 2px solid #e8d5c4;
+  border-radius: 12px;
+  background: #fffaf7;
+  color: #5c3a21;
+  outline: none;
+  transition: border-color 0.2s;
+}
 
-    @keyframes beat {
-      0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.2); }
-    }
+.form-group input:focus {
+  border-color: #d2691e;
+}
 
-    .clock-wrapper {
-      background: linear-gradient(145deg, #3d2817, #2a1810);
-      border-radius: 16px;
-      padding: 28px 20px;
-      box-shadow:
-        inset 0 2px 6px rgba(0, 0, 0, 0.4),
-        0 4px 14px rgba(255, 167, 112, 0.3);
-    }
+.form-group .toggle-pwd {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #a0673a;
+  padding: 4px;
+  line-height: 1;
+}
 
-    .clock-label {
-      font-size: 0.8rem;
-      color: #ffa770;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
+.error-msg {
+  color: #d32f2f;
+  font-size: 0.88rem;
+  text-align: center;
+  min-height: 1.4em;
+  margin-bottom: 4px;
+}
 
-    .clock {
-      font-family: "Courier New", "Menlo", monospace;
-      font-size: 3rem;
-      font-weight: bold;
-      color: #ffb88c;
-      letter-spacing: 6px;
-      text-shadow:
-        0 0 8px rgba(255, 184, 140, 0.6),
-        0 0 18px rgba(255, 167, 112, 0.4);
-    }
+/* ===== 按钮 ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, opacity 0.2s;
+}
+.btn:active { transform: scale(0.97); }
 
-    .date {
-      margin-top: 10px;
-      font-size: 0.95rem;
-      color: #d9a679;
-      letter-spacing: 2px;
-    }
+.btn-primary {
+  width: 100%;
+  background: #d2691e;
+  color: #fff;
+  padding: 14px;
+  font-size: 1.05rem;
+}
+.btn-primary:hover { background: #b8591a; }
 
-    .footer {
-      margin-top: 28px;
-      font-size: 0.85rem;
-      color: #a0673a;
-    }
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
 
-    @media (max-width: 480px) {
-      .container { padding: 32px 22px; }
-      h1         { font-size: 1.7rem; }
-      .clock     { font-size: 2.2rem; letter-spacing: 4px; }
-    }
-  </style>
+.btn-outline {
+  background: transparent;
+  color: #a0673a;
+  border: 1.5px solid #d4b896;
+}
+.btn-outline:hover { background: rgba(210, 105, 30, 0.06); }
+
+.btn-danger {
+  background: transparent;
+  color: #d32f2f;
+  border: 1.5px solid #e0c0c0;
+}
+.btn-danger:hover { background: rgba(211, 47, 47, 0.06); }
+
+/* ===== 应用主屏幕 ===== */
+#screen-app {
+  flex-direction: column;
+  padding: 0;
+}
+
+.app-header {
+  width: 100%;
+  background: linear-gradient(145deg, #3d2817, #2a1810);
+  color: #ffb88c;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.app-header h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #ffa770;
+}
+
+.app-header .header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.app-header .btn-sm {
+  color: #ffb88c;
+  border-color: rgba(255, 184, 140, 0.3);
+  font-size: 0.82rem;
+  padding: 5px 12px;
+}
+.app-header .btn-sm:hover { background: rgba(255, 255, 255, 0.08); }
+
+.app-container {
+  width: min(100%, 720px);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px 20px;
+  overflow: hidden;
+}
+
+/* ===== 标签页导航 ===== */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e8d5c4;
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 600;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #a0673a;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -2px;
+}
+.tab-btn:hover { color: #d2691e; }
+.tab-btn.active {
+  color: #d2691e;
+  border-bottom-color: #d2691e;
+}
+
+.tab-content { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.tab-content.active { display: flex; }
+
+/* ===== 草稿纸 ===== */
+.scratchpad-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.scratchpad-area textarea {
+  flex: 1;
+  width: 100%;
+  padding: 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.8;
+  color: #5c3a21;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid #e8d5c4;
+  border-radius: 12px;
+  resize: vertical;
+  outline: none;
+  min-height: 240px;
+}
+.scratchpad-area textarea:focus {
+  border-color: #d2691e;
+  background: rgba(255, 255, 255, 0.85);
+}
+.scratchpad-area textarea::placeholder {
+  color: #c4a88c;
+}
+
+.scratchpad-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toolbar-status {
+  font-size: 0.82rem;
+  color: #a0673a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ===== 日记 ===== */
+.diary-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.diary-list-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.diary-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.entries-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.entry-card {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid #e8d5c4;
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: box-shadow 0.2s;
+}
+.entry-card:hover {
+  box-shadow: 0 2px 10px rgba(210, 105, 30, 0.08);
+}
+
+.entry-card .entry-date {
+  font-size: 0.8rem;
+  color: #a0673a;
+  margin-bottom: 4px;
+}
+
+.entry-card .entry-title {
+  font-weight: 700;
+  color: #5c3a21;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entry-card .entry-preview {
+  font-size: 0.9rem;
+  color: #8b6f5a;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.entry-card .entry-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ===== 日记编辑器 ===== */
+.diary-editor-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.diary-editor-view input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1.05rem;
+  font-family: inherit;
+  font-weight: 600;
+  border: 1.5px solid #e8d5c4;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  color: #5c3a21;
+  outline: none;
+  margin-bottom: 12px;
+}
+.diary-editor-view input[type="text"]:focus {
+  border-color: #d2691e;
+}
+
+.diary-editor-view textarea {
+  flex: 1;
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.8;
+  color: #5c3a21;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid #e8d5c4;
+  border-radius: 12px;
+  resize: vertical;
+  outline: none;
+  min-height: 160px;
+  margin-bottom: 12px;
+}
+.diary-editor-view textarea:focus {
+  border-color: #d2691e;
+}
+
+.editor-meta {
+  font-size: 0.82rem;
+  color: #a0673a;
+  margin-bottom: 12px;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ===== 空状态 ===== */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #bfa58a;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 40px 20px;
+}
+.empty-state .empty-icon {
+  font-size: 2.6rem;
+  margin-bottom: 10px;
+  opacity: 0.6;
+}
+
+/* ===== 确认模态框 ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(60, 30, 10, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+  padding: 20px;
+}
+
+.modal-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 28px 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  width: min(100%, 360px);
+  text-align: center;
+}
+
+.modal-card p {
+  font-size: 1rem;
+  color: #5c3a21;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-actions .btn {
+  min-width: 90px;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 480px) {
+  .card { padding: 28px 20px; }
+
+  .card h1 { font-size: 1.4rem; }
+
+  .app-header { padding: 12px 16px; }
+  .app-header h2 { font-size: 1rem; }
+
+  .app-container { padding: 12px 12px 16px; }
+
+  .tab-btn { font-size: 0.9rem; padding: 10px 0; }
+
+  .scratchpad-area textarea,
+  .diary-editor-view textarea { font-size: 0.95rem; min-height: 180px; }
+
+  .entry-card { padding: 12px 14px; }
+  .entry-card .entry-title { font-size: 0.95rem; }
+
+  .modal-card { padding: 22px 20px; }
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>rosermf2040 的个人空间!!!!!原来要懂这个位置的代码啊</h1>
-    <p class="subtitle">~ 一个属于自己的温暖小角落  好爱你啊。~</p>
 
-    <div class="intro">
-      <p>你好呀,欢迎来到我的小天地 <span class="heart">♥</span></p>
-      <p>我是 rosermf2040,一个热爱代码、也热爱生活的人。
-        在键盘的敲击声里寻找逻辑的优雅,在清晨的咖啡香里感受日常的美好。</p>
-      <p>事业是我表达自己的方式,我相信每一行用心写下的代码,都在让世界变得更好一点;
-        而生活,是事业之外最温柔的礼物 —— 一本好书、一段散步、一顿家常便饭,
-        都让我觉得活着真的很值得。</p>
-      <p>愿你也能在这里慢下来,听一听时间流过的声音。</p>
-    </div>
-
-    <div class="clock-wrapper">
-      <div class="clock-label">· Now ·</div>
-      <div class="clock" id="clock">00:00:00</div>
-      <div class="date" id="date">----年--月--日 星期--</div>
-    </div>
-
-    <div class="footer">© rosermf2040 · 用心生活,认真热爱</div>
+<!-- ===== 设置密码屏幕 ===== -->
+<div id="screen-setup" class="screen">
+  <div class="card">
+    <h1>&#x1F58A; 欢迎使用备忘录</h1>
+    <p class="subtitle">首次使用，请设置访问口令</p>
+    <form id="setup-form" autocomplete="off">
+      <div class="form-group">
+        <input type="password" id="setup-password" placeholder="请输入口令（至少4位）" maxlength="256" autocomplete="new-password">
+        <button type="button" class="toggle-pwd" data-target="setup-password" tabindex="-1">&#x1F441;</button>
+      </div>
+      <div class="form-group">
+        <input type="password" id="setup-confirm" placeholder="请确认口令" maxlength="256" autocomplete="new-password">
+        <button type="button" class="toggle-pwd" data-target="setup-confirm" tabindex="-1">&#x1F441;</button>
+      </div>
+      <p class="error-msg" id="setup-error"></p>
+      <button type="submit" class="btn btn-primary">确 认</button>
+    </form>
   </div>
+</div>
 
-  <script>
-    const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+<!-- ===== 登录屏幕 ===== -->
+<div id="screen-login" class="screen hidden">
+  <div class="card">
+    <h1>&#x1F512; 备忘录</h1>
+    <p class="subtitle">请输入口令以解锁</p>
+    <form id="login-form" autocomplete="off">
+      <div class="form-group">
+        <input type="password" id="login-password" placeholder="请输入口令" maxlength="256" autocomplete="current-password">
+        <button type="button" class="toggle-pwd" data-target="login-password" tabindex="-1">&#x1F441;</button>
+      </div>
+      <p class="error-msg" id="login-error"></p>
+      <button type="submit" class="btn btn-primary">解 锁</button>
+    </form>
+  </div>
+</div>
 
-    function pad(n) {
-      return n.toString().padStart(2, '0');
+<!-- ===== 应用主屏幕 ===== -->
+<div id="screen-app" class="screen hidden">
+  <header class="app-header">
+    <h2>&#x1F4DD; 备忘录</h2>
+    <div class="header-actions">
+      <button class="btn btn-sm btn-outline" id="btn-changepwd">改密</button>
+      <button class="btn btn-sm btn-outline" id="btn-lock">&#x1F512; 锁定</button>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- 标签页 -->
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="scratchpad">草稿纸</button>
+      <button class="tab-btn" data-tab="diary">日记</button>
+    </nav>
+
+    <!-- 草稿纸 -->
+    <div class="tab-content active" id="tab-content-scratchpad">
+      <div class="scratchpad-area">
+        <textarea id="scratchpad-textarea" placeholder="开始记录..."></textarea>
+        <div class="scratchpad-toolbar">
+          <div class="toolbar-status">
+            <span id="scratchpad-status">就绪</span>
+            <span id="scratchpad-count">0 字</span>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-sm btn-outline" id="btn-scratchpad-download">下载 .txt</button>
+            <button class="btn btn-sm btn-danger" id="btn-scratchpad-clear">清空</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 日记 -->
+    <div class="tab-content" id="tab-content-diary">
+      <div class="diary-area">
+        <!-- 列表视图 -->
+        <div class="diary-list-view" id="diary-list-view">
+          <div class="diary-list-header">
+            <span style="font-weight:600;color:#a0673a;" id="diary-count-label">共 0 篇</span>
+            <button class="btn btn-sm btn-primary" id="btn-diary-new">+ 新建日记</button>
+          </div>
+          <div class="entries-scroll" id="diary-entries">
+            <div class="empty-state">
+              <div class="empty-icon">&#x1F4D6;</div>
+              <p>还没有日记</p>
+              <p style="font-size:0.85rem;">点击上方按钮开始写第一篇吧</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 编辑器视图 -->
+        <div class="diary-editor-view hidden" id="diary-editor-view">
+          <input type="text" id="diary-title" placeholder="标题（可选）" maxlength="200">
+          <textarea id="diary-content" placeholder="写点什么..."></textarea>
+          <div class="editor-meta" id="editor-meta"></div>
+          <div class="editor-actions">
+            <button class="btn btn-sm btn-outline" id="btn-diary-cancel">取消</button>
+            <button class="btn btn-sm btn-primary" id="btn-diary-save">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 确认模态框 ===== -->
+<div id="modal-confirm" class="screen hidden" style="position:fixed;inset:0;z-index:100;padding:20px;">
+  <div class="modal-overlay" id="modal-overlay" style="position:static;">
+    <div class="modal-card">
+      <p id="modal-message"></p>
+      <div class="modal-actions">
+        <button class="btn btn-sm btn-outline" id="modal-cancel-btn">取消</button>
+        <button class="btn btn-sm btn-danger" id="modal-confirm-btn" style="background:#d32f2f;color:#fff;border:none;">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   备忘录 — 口令保护的单文件记事本
+   ================================================================ */
+
+// ---- 状态 ----
+const AppState = {
+  currentScreen: null,
+  currentTab: 'scratchpad',
+  diaryView: 'list',
+  editingEntryId: null,
+  diaryEntries: [],
+  saveTimer: null,
+  diaryDirty: false,
+  originalDiaryTitle: '',
+  originalDiaryContent: ''
+};
+
+// ---- 工具函数 ----
+function $(id) { return document.getElementById(id); }
+
+async function hashPassword(password) {
+  const data = new TextEncoder().encode(password);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function todayStr() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function safeFilename(str) {
+  return str.replace(/[\/\\:*?"<>|]/g, '_').trim() || '未命名';
+}
+
+function downloadText(filename, content) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ---- localStorage 检测 ----
+function checkStorage() {
+  try {
+    localStorage.setItem('_t', '1');
+    localStorage.removeItem('_t');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ---- 屏幕管理 ----
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  const el = $(`screen-${id}`);
+  if (el) el.classList.remove('hidden');
+  AppState.currentScreen = id;
+}
+
+// ---- 密码可见性切换 ----
+document.querySelectorAll('.toggle-pwd').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = $(btn.dataset.target);
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '\u{1F441}' : '\u{1F576}';
+  });
+});
+
+// ================================================================
+//  密码模块
+// ================================================================
+
+// 设置密码
+$('setup-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pwd = $('setup-password').value;
+  const confirm = $('setup-confirm').value;
+  const err = $('setup-error');
+
+  if (pwd.length < 4) {
+    err.textContent = '口令至少需要4位字符';
+    return;
+  }
+  if (pwd !== confirm) {
+    err.textContent = '两次输入的口令不一致';
+    return;
+  }
+
+  const hash = await hashPassword(pwd);
+  localStorage.setItem('note_pass', hash);
+  localStorage.setItem('note_scratch', '');
+  localStorage.setItem('note_diary', '[]');
+  err.textContent = '';
+  enterApp();
+});
+
+// 登录
+$('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pwd = $('login-password').value;
+  const err = $('login-error');
+  const stored = localStorage.getItem('note_pass');
+
+  const hash = await hashPassword(pwd);
+  if (hash !== stored) {
+    err.textContent = '口令错误，请重试';
+    $('login-password').value = '';
+    $('login-password').focus();
+    // 抖动动画
+    const card = document.querySelector('#screen-login .card');
+    card.style.animation = 'none';
+    card.offsetHeight;
+    card.style.animation = 'shake 0.4s ease';
+    return;
+  }
+
+  err.textContent = '';
+  enterApp();
+});
+
+// 锁定
+$('btn-lock').addEventListener('click', async () => {
+  if (AppState.currentTab === 'diary' && AppState.diaryView === 'editor') {
+    const curTitle = $('diary-title').value.trim();
+    const curContent = $('diary-content').value;
+    if (curTitle !== AppState.originalDiaryTitle || curContent !== AppState.originalDiaryContent) {
+      const ok = await showConfirm('有未保存的日记更改，确定锁定吗？');
+      if (!ok) return;
     }
+  }
+  AppState.diaryEntries = [];
+  AppState.editingEntryId = null;
+  AppState.diaryDirty = false;
+  showScreen('login');
+  $('login-password').value = '';
+  $('login-error').textContent = '';
+  $('login-password').focus();
+});
 
-    function updateClock() {
-      const now = new Date();
-      const h = pad(now.getHours());
-      const m = pad(now.getMinutes());
-      const s = pad(now.getSeconds());
-      document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+// 改密
+$('btn-changepwd').addEventListener('click', () => {
+  const oldPwd = prompt('请输入当前口令：');
+  if (!oldPwd) return;
 
-      const y = now.getFullYear();
-      const mo = pad(now.getMonth() + 1);
-      const d = pad(now.getDate());
-      const w = weekDays[now.getDay()];
-      document.getElementById('date').textContent = `${y}年${mo}月${d}日 星期${w}`;
+  hashPassword(oldPwd).then(hash => {
+    if (hash !== localStorage.getItem('note_pass')) {
+      alert('当前口令错误。');
+      return;
     }
+    const newPwd = prompt('请输入新口令（至少4位）：');
+    if (!newPwd) return;
+    if (newPwd.length < 4) {
+      alert('新口令至少需要4位字符。');
+      return;
+    }
+    const confirm = prompt('请确认新口令：');
+    if (newPwd !== confirm) {
+      alert('两次输入不一致。');
+      return;
+    }
+    hashPassword(newPwd).then(newHash => {
+      localStorage.setItem('note_pass', newHash);
+      alert('口令已更新。');
+    });
+  });
+});
 
-    updateClock();
-    setInterval(updateClock, 1000);
-  </script>
+// ---- 进入应用 ----
+function enterApp() {
+  showScreen('app');
+  if (AppState.currentTab === 'scratchpad') {
+    loadScratchpad();
+  }
+  loadDiaryEntries();
+  renderDiaryList();
+  switchTab(AppState.currentTab);
+}
+
+// ================================================================
+//  标签页切换
+// ================================================================
+
+async function switchTab(tab) {
+  // 如果正在编辑日记且有未保存更改，先确认
+  if (AppState.currentTab === 'diary' && AppState.diaryView === 'editor') {
+    const curTitle = $('diary-title').value.trim();
+    const curContent = $('diary-content').value;
+    if (curTitle !== AppState.originalDiaryTitle || curContent !== AppState.originalDiaryContent) {
+      const ok = await showConfirm('有未保存的日记更改，确定离开吗？');
+      if (!ok) {
+        // 恢复标签页高亮
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.tab === AppState.currentTab);
+        });
+        return;
+      }
+    }
+  }
+
+  AppState.currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === `tab-content-${tab}`);
+  });
+  if (tab === 'scratchpad') {
+    loadScratchpad();
+    $('scratchpad-textarea').focus();
+  }
+  if (tab === 'diary') {
+    loadDiaryEntries();
+    renderDiaryList();
+    showDiaryView('list');
+  }
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// ================================================================
+//  草稿纸模块
+// ================================================================
+
+function loadScratchpad() {
+  const content = localStorage.getItem('note_scratch') || '';
+  $('scratchpad-textarea').value = content;
+  updateScratchpadCount();
+  $('scratchpad-status').textContent = '就绪';
+}
+
+function updateScratchpadCount() {
+  const len = $('scratchpad-textarea').value.length;
+  $('scratchpad-count').textContent = `${len} 字`;
+}
+
+$('scratchpad-textarea').addEventListener('input', () => {
+  clearTimeout(AppState.saveTimer);
+  $('scratchpad-status').textContent = '正在保存...';
+  updateScratchpadCount();
+  AppState.saveTimer = setTimeout(() => {
+    localStorage.setItem('note_scratch', $('scratchpad-textarea').value);
+    $('scratchpad-status').textContent = '已自动保存';
+  }, 300);
+});
+
+$('btn-scratchpad-download').addEventListener('click', () => {
+  const content = $('scratchpad-textarea').value;
+  downloadText(`草稿纸_${todayStr()}.txt`, content);
+});
+
+$('btn-scratchpad-clear').addEventListener('click', async () => {
+  const ok = await showConfirm('确定要清空草稿纸吗？此操作不可撤销。');
+  if (!ok) return;
+  $('scratchpad-textarea').value = '';
+  localStorage.setItem('note_scratch', '');
+  updateScratchpadCount();
+  $('scratchpad-status').textContent = '已清空';
+});
+
+// ================================================================
+//  日记模块
+// ================================================================
+
+function loadDiaryEntries() {
+  try {
+    AppState.diaryEntries = JSON.parse(localStorage.getItem('note_diary') || '[]');
+  } catch {
+    AppState.diaryEntries = [];
+  }
+}
+
+function saveDiaryEntries() {
+  localStorage.setItem('note_diary', JSON.stringify(AppState.diaryEntries));
+}
+
+function showDiaryView(view) {
+  AppState.diaryView = view;
+  $('diary-list-view').classList.toggle('hidden', view !== 'list');
+  $('diary-editor-view').classList.toggle('hidden', view !== 'editor');
+}
+
+function renderDiaryList() {
+  const container = $('diary-entries');
+  const sorted = [...AppState.diaryEntries].sort((a, b) =>
+    new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  $('diary-count-label').textContent = `共 ${sorted.length} 篇`;
+
+  if (sorted.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">&#x1F4D6;</div>
+        <p>还没有日记</p>
+        <p style="font-size:0.85rem;">点击上方按钮开始写第一篇吧</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = sorted.map(entry => {
+    const preview = (entry.content || '').replace(/\n/g, ' ').slice(0, 150);
+    return `
+      <div class="entry-card">
+        <div class="entry-date">${formatDate(entry.createdAt)}</div>
+        <div class="entry-title">${escapeHtml(entry.title || '无标题')}</div>
+        <div class="entry-preview">${escapeHtml(preview) || '（无内容）'}</div>
+        <div class="entry-actions">
+          <button class="btn btn-sm btn-outline" data-download="${entry.id}">下载</button>
+          <button class="btn btn-sm btn-outline" data-edit="${entry.id}">编辑</button>
+          <button class="btn btn-sm btn-danger" data-delete="${entry.id}">删除</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  // 绑定事件
+  container.querySelectorAll('[data-download]').forEach(btn => {
+    btn.addEventListener('click', () => downloadEntry(btn.dataset.download));
+  });
+  container.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', () => editEntry(btn.dataset.edit));
+  });
+  container.querySelectorAll('[data-delete]').forEach(btn => {
+    btn.addEventListener('click', () => deleteEntry(btn.dataset.delete));
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// 新建日记
+$('btn-diary-new').addEventListener('click', () => {
+  AppState.editingEntryId = null;
+  AppState.diaryDirty = false;
+  $('diary-title').value = '';
+  $('diary-content').value = '';
+  $('editor-meta').textContent = '';
+  AppState.originalDiaryTitle = '';
+  AppState.originalDiaryContent = '';
+  showDiaryView('editor');
+  $('diary-title').focus();
+});
+
+// 编辑日记
+function editEntry(id) {
+  const entry = AppState.diaryEntries.find(e => e.id === id);
+  if (!entry) return;
+  AppState.editingEntryId = id;
+  AppState.diaryDirty = false;
+  $('diary-title').value = entry.title || '';
+  $('diary-content').value = entry.content || '';
+  $('editor-meta').textContent = `创建于: ${formatDate(entry.createdAt)}`;
+  AppState.originalDiaryTitle = entry.title || '';
+  AppState.originalDiaryContent = entry.content || '';
+  showDiaryView('editor');
+  $('diary-title').focus();
+}
+
+// 删除日记
+async function deleteEntry(id) {
+  const ok = await showConfirm('确定要删除这条日记吗？此操作不可撤销。');
+  if (!ok) return;
+  AppState.diaryEntries = AppState.diaryEntries.filter(e => e.id !== id);
+  saveDiaryEntries();
+  renderDiaryList();
+}
+
+// 下载单篇日记
+function downloadEntry(id) {
+  const entry = AppState.diaryEntries.find(e => e.id === id);
+  if (!entry) return;
+  const text = `标题: ${entry.title || '无标题'}\n日期: ${formatDate(entry.createdAt)}\n---\n${entry.content}`;
+  const fname = `日记_${todayStr()}_${safeFilename(entry.title || '无标题')}.txt`;
+  downloadText(fname, text);
+}
+
+// 保存日记
+$('btn-diary-save').addEventListener('click', () => {
+  const title = $('diary-title').value.trim();
+  const content = $('diary-content').value;
+
+  if (!title && !content.trim()) {
+    alert('标题和内容不能同时为空。');
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  if (AppState.editingEntryId) {
+    const entry = AppState.diaryEntries.find(e => e.id === AppState.editingEntryId);
+    if (entry) {
+      entry.title = title;
+      entry.content = content;
+      entry.updatedAt = now;
+    }
+  } else {
+    AppState.diaryEntries.push({
+      id: 'd_' + Date.now(),
+      createdAt: now,
+      updatedAt: now,
+      title: title || '无标题',
+      content: content
+    });
+  }
+
+  saveDiaryEntries();
+  AppState.diaryDirty = false;
+  showDiaryView('list');
+  renderDiaryList();
+});
+
+// 取消编辑
+$('btn-diary-cancel').addEventListener('click', async () => {
+  const curTitle = $('diary-title').value.trim();
+  const curContent = $('diary-content').value;
+  if (curTitle !== AppState.originalDiaryTitle || curContent !== AppState.originalDiaryContent) {
+    const ok = await showConfirm('有未保存的更改，确定放弃吗？');
+    if (!ok) return;
+  }
+  AppState.diaryDirty = false;
+  showDiaryView('list');
+  renderDiaryList();
+});
+
+// ================================================================
+//  确认模态框
+// ================================================================
+
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const modal = $('modal-confirm');
+    $('modal-message').textContent = message;
+    modal.classList.remove('hidden');
+
+    const cleanup = (result) => {
+      modal.classList.add('hidden');
+      resolve(result);
+    };
+
+    $('modal-confirm-btn').onclick = () => cleanup(true);
+    $('modal-cancel-btn').onclick = () => cleanup(false);
+    $('modal-overlay').onclick = (e) => {
+      if (e.target === $('modal-overlay')) cleanup(false);
+    };
+
+    // Escape 键关闭
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        document.removeEventListener('keydown', onKey);
+        cleanup(false);
+      }
+    };
+    document.addEventListener('keydown', onKey, { once: true });
+  });
+}
+
+// ================================================================
+//  清除数据（开发/重置用）
+// ================================================================
+
+// 在控制台暴露清除方法
+window.clearAllData = async function () {
+  const ok = await showConfirm('确定要清除所有数据吗？这将删除所有笔记和密码，此操作不可撤销。');
+  if (!ok) return;
+  localStorage.clear();
+  location.reload();
+};
+
+// ================================================================
+//  初始化
+// ================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!checkStorage()) {
+    document.body.innerHTML = `
+      <div class="screen" style="display:flex;">
+        <div class="card" style="text-align:center;">
+          <h1 style="color:#d32f2f;">无法使用</h1>
+          <p>您的浏览器不支持本地存储（localStorage），请使用现代浏览器打开此页面。</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const hasPassword = localStorage.getItem('note_pass') !== null;
+
+  if (!hasPassword) {
+    showScreen('setup');
+    $('setup-password').focus();
+  } else {
+    showScreen('login');
+    $('login-password').focus();
+  }
+
+  // 密码输入框回车提交
+  $('setup-password').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('setup-confirm').focus();
+    }
+  });
+  $('setup-confirm').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('setup-form').dispatchEvent(new Event('submit'));
+    }
+  });
+  $('login-password').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('login-form').dispatchEvent(new Event('submit'));
+    }
+  });
+});
+</script>
 </body>
 </html>
