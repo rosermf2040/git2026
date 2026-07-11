@@ -489,6 +489,7 @@ git commit -m "feat: 实现 Flask 主入口与 API 路由"
 
 Write `stock-dashboard/templates/dashboard.html`:
 
+{% raw %}
 ```html
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -900,6 +901,7 @@ Write `stock-dashboard/templates/dashboard.html`:
 </body>
 </html>
 ```
+{% endraw %}
 
 - [ ] **Step 2: Commit**
 
